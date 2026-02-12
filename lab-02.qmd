@@ -29,6 +29,13 @@ Illinois has the highest number of counties with 102, while Wisconsin has the lo
 
 ### Question 2
 
+```{r}
+midwest |>
+  count(county, state) |>
+  count(county, name = "nstates") |>
+  filter(nstates == 5)
+```
+
 \newpage
 
 ### Question 3
