@@ -1,13 +1,9 @@
 ---
 title: "Lab 2 - Data wrangling"
-author: "John Q. Student"
-date: "June 24, 1497"
-format: 
-  html: default # for speed
-  pdf: default # for final output
-
+author: "Ayden Frost"
+date: "February 12, 2026"
+format: pdf
 ---
-
 
 ```{r}
 #| eval: true
@@ -16,41 +12,327 @@ format:
 library(tidyverse)
 ```
 
-
 # Questions
 
 ## Part 1
 
 ### Question 1
 
+```{r}
+midwest |>
+  count(state, sort = TRUE)
+```
+
+Illinois has the highest number of counties with 102, while Wisconsin has the lowest number of counties with only 72.
 
 \newpage
 
 ### Question 2
 
+```{r}
+midwest |>
+  count(county, state) |>
+  count(county, name = "nstates") |>
+  filter(nstates == 5)
+```
+
 \newpage
 
 ### Question 3
+
+```{r}
+midwest |>
+  filter(popdensity > 25000) |>
+  select(county, state, popdensity, poptotal, area) |>
+  arrange(desc(popdensity))
+```
+
+```{r}
+midwest |>
+  filter(popdensity == max(popdensity)) |>
+  select(county, state, popdensity, poptotal, area)
+```
+
+\newpage
+
+### Question 4
+
+```{r}
+midwest |>
+  summarize(
+    median(popdensity),
+    q1 = quantile(popdensity, 0.25),
+    q3 = quantile(popdensity, 0.75)
+  )
+```
+
+The distribution of population density of counties is unimodal and extremely right-skewed. A typical Midwestern county has population density of 1156 people per unit area. The middle 50% of the counties have population densities between 622 to 2330 people per unit area.
+
 \newpage
 
 ### Question 5
+
+```{r}
+midwest |>
+  count(state, inmetro) |>
+  group_by(state) |>
+  mutate(prop = n / sum(n))
+```
 
 \newpage
 
 ### Question 6
 
+```{r}
+midwest |>
+  filter(percbelowpoverty >= 40,
+         percollege <= 10) |>
+  select(county, state,
+         percbelowpoverty,
+         percollege)
+```
+
+\newpage
+
+```{r}
+midwest |>
+  filter(percollege >= 40,
+         percbelowpoverty <= 20) |>
+  select(county, state,
+         percbelowpoverty,
+         percollege)
+```
+
+\newpage
+
+```{r}
+midwest |>
+  filter(
+    (percbelowpoverty >= 40 & percollege <= 10) |
+    (percbelowpoverty <= 20 & percollege >= 40)
+  ) |>
+  select(county, state,
+         percbelowpoverty,
+         percollege)
+```
+
+\newpage
+
+```{r}
+midwest |>
+  mutate(
+    potential_outlier = if_else(
+    (percbelowpoverty >= 40 & percollege <= 10) |
+    (percbelowpoverty <= 20 & percollege >= 40),
+      "Yes",
+      "No"
+    )
+  ) |>
+  select(county, state,
+         percbelowpoverty,
+         percollege,
+         potential_outlier) |>
+  arrange(potential_outlier)
+```
+
+\newpage
+
+```{r}
+midwest |> 
+  mutate(
+  potential_outlier = if_else (
+(percbelowpoverty >= 40 & percollege <= 10) | 
+(percbelowpoverty <= 20 & percollege >= 40),
+"Yes",
+"No")) |>
+ggplot (aes (x = percollege, y = percbelowpoverty, colour = potential_outlier, shape = state)) +
+geom_point() +
+  labs (
+  x= "% college educated",
+  y = "% below poverty",
+  colour = "Potential Outlier",
+  shape = "The state the county is in",
+  title = "Percentage with a College degree versus poverty rate",
+  subtitle = "by State in the Midwest")
+
+```
+
 \newpage
 
 ### Question 7
+
+```{r}
+  state_population <- midwest |>
+  group_by(state) |>
+  summarize(total_population = sum(poptotal)) |>
+  arrange(desc(total_population))
+state_population
+```
+
+\newpage
+
+```{r}
+state_population |>
+  mutate(
+    population_prop = total_population / sum(total_population)
+  ) |>
+  arrange(desc(population_prop))
+```
+
+Illinois is the most populated with 27% of the Midwestern population living there.
 
 \newpage
 
 ### Question 8
 
+```{r}
+state_poverty <- midwest |>
+  group_by(state) |>
+  summarise(mean_percbelowpoverty = mean(percbelowpoverty))
+state_poverty
+```
+
+\newpage
+
+```{r}
+state_poverty |>
+  arrange(mean_percbelowpoverty)
+```
+
+Indiana has the lowest average percentage below poverty across its counties, while Michigan has the highest average percentage below poverty.
+
 \newpage
 
 ## Part 2
 
-
 ### Question 9
 
+```{r}
+df <- tibble(
+  var_1 = c(10, 20, 30, 40, 50),
+  var_2 = c("Pizza", "Burger", "Pizza", "Pizza", "Burger"),
+  var_3 = c("Apple", "Apple", "Pear", "Pear", "Banana")
+)
+
+df
+```
+
+\newpage
+
+a.)
+
+```{r}
+df <- tibble(
+  var_1 = c(10, 20, 30, 40, 50),
+  var_2 = c("Pizza", "Burger", "Pizza", "Pizza", "Burger"),
+  var_3 = c("Apple", "Apple", "Pear", "Pear", "Banana")
+)
+
+df |>
+  arrange(var_2)
+```
+
+The code changed the order of the var_2 column from "Pizza, burger, pizza, pizza, burger" to "Burger, burger, pizza, pizza, pizza". In short, the arrange sorted the rows in variable 2 by ascending alphabetical or numeric order.
+
+\newpage
+
+b.)
+
+```{r}
+df <- tibble(
+  var_1 = c(10, 20, 30, 40, 50),
+  var_2 = c("Pizza", "Burger", "Pizza", "Pizza", "Burger"),
+  var_3 = c("Apple", "Apple", "Pear", "Pear", "Banana")
+)
+
+df |>
+  group_by(var_2)
+```
+
+The "group_by" didn't seem to have an effect on variable 2 as the values seemed to reflect those found in the original tibble table. The "group_by" grouped the data set based on the values within the variable 2 row, but left all the rows and other variables unchanged. When comparing "arrange" and "group_by", we can see that "group_by" only effects the data groupings while leaving everything else the same compared to the "arrange" function which simply rearranges the rows.
+
+\newpage
+
+c.)
+
+```{r}
+df <- tibble(
+  var_1 = c(10, 20, 30, 40, 50),
+  var_2 = c("Pizza", "Burger", "Pizza", "Pizza", "Burger"),
+  var_3 = c("Apple", "Apple", "Pear", "Pear", "Banana")
+)
+
+df |>
+  group_by(var_2) |>
+  summarize(mean_var_1 = mean(var_1))
+```
+
+The new code groups the data based on the values within the variable 2 row with "group_by", then forms 2 rows based on the mean values of variable 1 found within each new grouping using "summarize".
+
+\newpage
+
+d.)
+
+```{r}
+df <- tibble(
+  var_1 = c(10, 20, 30, 40, 50),
+  var_2 = c("Pizza", "Burger", "Pizza", "Pizza", "Burger"),
+  var_3 = c("Apple", "Apple", "Pear", "Pear", "Banana")
+)
+
+df |>
+  group_by(var_2, var_3) |>
+  summarize(mean_var_1 = mean(var_1))
+```
+
+The code created groupings based on variables 2 and 3 using "group_by", then found the mean value of variable 1 found within each new grouping using "summarize". The message states that the summarize is based on the 2nd variable and to change that you can use the ".groups" argument.
+
+\newpage
+
+e.)
+
+```{r}
+df <- tibble(
+  var_1 = c(10, 20, 30, 40, 50),
+  var_2 = c("Pizza", "Burger", "Pizza", "Pizza", "Burger"),
+  var_3 = c("Apple", "Apple", "Pear", "Pear", "Banana")
+)
+df |>
+  group_by(var_2, var_3) |>
+  summarize(mean_var_1 = mean(var_1), .groups = "drop")
+
+```
+
+Everything in the code and output is the same as part d apart from the ".groups" which ungroups the data after the "summarize" has been completed.
+
+\newpage
+
+f.)
+
+```{r}
+
+df <- tibble(
+  var_1 = c(10, 20, 30, 40, 50),
+  var_2 = c("Pizza", "Burger", "Pizza", "Pizza", "Burger"),
+  var_3 = c("Apple", "Apple", "Pear", "Pear", "Banana")
+)
+df |>
+  group_by(var_2, var_3) |>
+  summarize(mean_var_1 = mean(var_1), .groups = "drop")
+
+
+
+```
+
+```{r}
+df <- tibble(
+  var_1 = c(10, 20, 30, 40, 50),
+  var_2 = c("Pizza", "Burger", "Pizza", "Pizza", "Burger"),
+  var_3 = c("Apple", "Apple", "Pear", "Pear", "Banana")
+)
+df |>
+  group_by(var_2, var_3) |>
+  mutate(mean_var_1 = mean(var_1))
+```
+
+The first pipeline made groupings based on variables 2 and 3, then found the mean values of variable 1 within each new grouping using the "summarize" argument. The ".groups" made it so that there were no groupings after the "summarize" was complete. The second pipeline still grouped by variables 2 and 3 but instead made a new column that shows the mean values of variable 1 within each new grouping using the "mutate" argument. All groupings remained and a new column was created.
