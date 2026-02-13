@@ -92,6 +92,8 @@ midwest |>
          percollege)
 ```
 
+\newpage
+
 ```{r}
 midwest |>
   filter(percollege >= 40,
@@ -100,6 +102,8 @@ midwest |>
          percbelowpoverty,
          percollege)
 ```
+
+\newpage
 
 ```{r}
 midwest |>
@@ -111,6 +115,8 @@ midwest |>
          percbelowpoverty,
          percollege)
 ```
+
+\newpage
 
 ```{r}
 midwest |>
@@ -128,6 +134,8 @@ midwest |>
          potential_outlier) |>
   arrange(potential_outlier)
 ```
+
+\newpage
 
 ```{r}
 midwest |> 
@@ -152,6 +160,26 @@ geom_point() +
 \newpage
 
 ### Question 7
+
+```{r}
+  state_population <- midwest |>
+  group_by(state) |>
+  summarize(total_population = sum(poptotal)) |>
+  arrange(desc(total_population))
+state_population
+```
+
+\newpage
+
+```{r}
+state_population |>
+  mutate(
+    population_prop = total_population / sum(total_population)
+  ) |>
+  arrange(desc(population_prop))
+```
+
+Illinois is the most populated with 27% of the Midwestern population living there.
 
 \newpage
 
